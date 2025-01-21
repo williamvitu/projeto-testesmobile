@@ -14,6 +14,8 @@ class TestBuscaWebmotors():
 		"appium:automationName": "UIAutomator2",
 		"appium:platformName": "Android",
 		"appium:newCommandTimeout": 3600,
+		"appium:appPackage": "hands.android.webmotors",
+		"appium:appActivity": "hands.android.webmotors/hands.android.webmotors.mvvm.view.home.HomeActivity"
 	}
 
 	url = "http://127.0.0.1:4723"
@@ -31,14 +33,21 @@ class TestBuscaWebmotors():
 
 	input_search_car = "hands.android.webmotors:id/et_search_view"
 
+	@pytest.fixture(scope="class", autouse=True)
+	def setup(self):
+		print("starting setup")
 
+		yield
+
+		# self.driver.quit()
 	def test_buscar_por_carro_no_campo_de_texto(self):
-
+		modelo_carro = "Honda Fit"
 		# Seleciona o botão 'Buscar'
 		self.driver.find_element(by=AppiumBy.ID, value=self.button_tab_search).click()
 		time.sleep(5)
 		# Digita o nome/modelo do carro no campo de busca
-		self.driver.find_element(by=AppiumBy.ID, value=self.input_search_car).send_keys("honda fit")
+		self.driver.find_element(by=AppiumBy.ID, value=self.input_search_car).send_keys(modelo_carro)
+
 		time.sleep(5)
 		# Clica no elemento de destaque de Busca
 		self.driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Honda Fit\")").click()
@@ -71,6 +80,19 @@ class TestBuscaWebmotors():
 		# Seleciona uma busca de marca rapida
 		self.driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"CHEVROLET\")").click()
 		time.sleep(5)
+		try:
+			# Verifica se aparece pop-up de localizacao
+			if self.driver.find_element(by=AppiumBy.ID, value=self.button_accept_location_app).is_displayed():
+				# Clica para permitir a localizacao
+				self.driver.find_element(by=AppiumBy.ID, value=self.button_accept_location_app).click()
+
+				# Verifica se aparece o pop-up de permissao de localizacao do android
+				if self.driver.find_element(by=AppiumBy.ID,
+											value=self.button_accept_location_permission).is_displayed():
+					# Clica para permitir que o aplicativo utilize a localizacao
+					self.driver.find_element(by=AppiumBy.ID, value=self.button_accept_location_permission).click()
+		except NoSuchElementException as e:
+			print(e)
 		# Clica no botao de filtro
 		self.driver.find_element(by=AppiumBy.ID, value=self.button_filter).click()
 
